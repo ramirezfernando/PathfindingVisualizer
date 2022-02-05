@@ -1,9 +1,18 @@
 import pygame, sys, time
 
+# node colors
 white = (250, 250, 250)
 red = (255, 0, 0)
 green = (0, 255, 0)
 black = (0, 0, 0)
+
+# mouse events 
+leftClick = 1
+middleClick = 2
+rightClick = 3
+scrollUp = 4
+scrollDown = 5
+
 
 pygame.init()
 width = 800
@@ -24,18 +33,32 @@ clock = pygame.time.Clock()
 
 
 class Node:
-    def __init__(self, row, col, width):
+    def __init__(self, row, col, color):
         self.row = row
         self.col = row
-        self.x = row * width
-        self.y = col * width
-        self.color = white
+        #self.x = row * width
+        #self.y = col * width
+        self.color = color
         self.neigbors = []
-        self.width = width
+  
+    def getRow(self):
+        return self.row
 
-    def getPosition(self):
-        return self.row, self.col
+    def getCol(self):
+        return self.col
 
+    def getColor(self):
+        return self.color
+
+    def getNeibors(self):
+        return [(self.row, self.col-1), (self.row, self.col+1), (self.row-1, self.col), (self.row+1, self.col)]
+        # up down left right
+
+startingNode = Node(5, 5, green)
+endNode = Node(35, 35, red)
+barrierNode = Node(0, 0, black)
+
+print(startingNode.getNeibors())
 class Button:
     def __init__(self, text):
         self.text = font.render(text, 1, pygame.Color("White"))
@@ -71,15 +94,20 @@ def drawGrid(size):
             pygame.draw.rect(screen, black, rect, 1)
             #pygame.display.update()
 
-def drawCell(row, col):
+def drawCell(row, col, color):
     blockSize = 20
     for x in range(0, (800 * 2) + 1, blockSize):
         for y in range(0, (800 * 2) + 1 , blockSize):
             if (40*row == x) and (40*col == y):
-                pygame.draw.rect(screen, [0,255,0], [(row-1)  * blockSize, (col-1) * blockSize, 20, 20]) 
+                pygame.draw.rect(screen, color, [(row-1)  * blockSize, (col-1) * blockSize, 20, 20]) 
                
        
-
+def eraseCell(row, col):
+    blockSize = 20
+    for x in range(0, (800 * 2) + 1, blockSize):
+        for y in range(0, (800 * 2) + 1 , blockSize):
+            if (40*row == x) and (40*col == y):
+                pygame.draw.rect(screen, white, [(row-1)  * blockSize, (col-1) * blockSize, 20, 20]) 
 
 
 
@@ -94,12 +122,22 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        # Draws in cell on left click or hold
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == leftClick or pygame.mouse.get_pressed()[0]:
             x,y = pygame.mouse.get_pos() 
             x = int(x / 20) + 1
             y = int(y / 20) + 1
             print(x,y)
-            drawCell(x, y)
+            drawCell(x, y, barrierNode.getColor())
             #clock.tick(30)
-    drawCell(1, 1)
+        
+        # Erases cell on right click
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == rightClick:
+            x,y = pygame.mouse.get_pos() 
+            x = int(x / 20) + 1
+            y = int(y / 20) + 1
+            eraseCell(x, y)
+          
+    drawCell(startingNode.getRow(),startingNode.getCol(), startingNode.getColor())
+    drawCell(endNode.getRow(),endNode.getCol(), endNode.getColor())
     pygame.display.update()

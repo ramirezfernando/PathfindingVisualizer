@@ -13,7 +13,7 @@ screen.fill(white)
 pygame.display.set_caption("Pathfinding Algorithm")
 
 
-#clock = pygame.time.Clock()
+clock = pygame.time.Clock()
 
 
 
@@ -95,6 +95,11 @@ while running:
         if event.type == pygame.QUIT:
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
-            drawCell(1, 1)
-            
+            x,y = pygame.mouse.get_pos() 
+            x = int(x / 20) + 1
+            y = int(y / 20) + 1
+            print(x,y)
+            drawCell(x, y)
+            #clock.tick(30)
+    drawCell(1, 1)
     pygame.display.update()

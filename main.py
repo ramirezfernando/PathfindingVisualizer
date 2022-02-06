@@ -1,12 +1,18 @@
+from turtle import pos
 import pygame, sys, time
+import math
+from queue import PriorityQueue
 
-# node colors
+# nodes/cell colors
 white = (250, 250, 250)
 red = (201, 102, 87)
 green = (99, 212, 139)
+yellow = (245, 255, 140)
+lightGreen = (173, 255, 202)
 lightBlue = (99, 153, 212)
 darkBlue = (32, 78, 128)
 black = (31, 28, 28)
+
 
 # mouse events 
 leftClick = 1
@@ -16,6 +22,7 @@ scrollUp = 4
 scrollDown = 5
 
 
+# pygame setup
 pygame.init()
 width = 800
 screen = pygame.display.set_mode((width, width + 100))
@@ -25,9 +32,7 @@ pygame.display.set_caption("Pathfinding Algorithm")
 clock = pygame.time.Clock()
 
 
-
-
-
+# Classes setup
 class Node:
     def __init__(self, row, col, color):
         self.row = row
@@ -36,7 +41,7 @@ class Node:
         self.neigbors = []
         self.visited = False
         self.prev = None
-        self.barrier = False
+        self.barrierList = []
 
   
     def getRow(self):
@@ -57,9 +62,14 @@ class Node:
         self.col = newCol
         return (self.row, self.col)
 
-    def isVisited(self):
-        return self.visited
-
+    def isBarrier(self, position):
+        if position in self.barrierList:
+            return True
+        else:
+            self.barrierList.append(position)
+            print(self.barrierList)
+            return False
+        
 
 
 startingNode = Node(5, 5, green)
@@ -80,6 +90,45 @@ class Button:
         self.surface.blit(self.text, (0,0))
 
 dijkstrasButton = Button("Dijkstra's Algorithm")
+
+
+# Algorithms
+def dijkstrasAlgo(startRow, startCol):
+    clock.tick(5)
+    #count = 0
+    #openSet = PriorityQueue()
+    #openSet.put((0, count, ))
+    #From each of the unvisited vertices, choose the vertex with the smallest distance and visit it.
+
+    #Update the distance for each neighboring vertex, of the visited vertex, whose current distance is greater than its sum and the weight of the edge between them.
+
+    #Repeat steps 1 and 2 until all the vertices are visited.
+    #pygame.time.delay(700)
+    x,y = pygame.mouse.get_pos() 
+    x = int(x / 20) + 1
+    y = int(y / 20) + 1
+    for i in range(1, 10):
+        if barrierNode.isBarrier((startRow + i, startCol)):
+            print("BARRIER")
+            break
+        else:
+            drawCell(startRow + i, startCol, lightGreen)
+            pygame.time.delay(700)
+            pygame.display.update()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -115,6 +164,7 @@ def drawCell(row, col, color):
     for x in range(0, (800 * 2) + 1, blockSize):
         for y in range(0, (800 * 2) + 1 , blockSize):
             if (40*row == x) and (40*col == y):
+                barrierNode.barrier = True
                 pygame.draw.rect(screen, color, [(row-1)  * blockSize, (col-1) * blockSize, 20, 20]) 
                
        
@@ -136,7 +186,6 @@ while running:
     screen.blit(dijkstrasButton.surface, (20, width+20))
     drawCell(startingNode.getRow(),startingNode.getCol(), startingNode.getColor())
     drawCell(endNode.getRow(),endNode.getCol(), endNode.getColor())
-    #dijkstrasAlgo(startingNode.getRow(),startingNode.getCol())
 
 
     for event in pygame.event.get():
@@ -147,9 +196,9 @@ while running:
             x,y = pygame.mouse.get_pos() 
             x = int(x / 20) + 1
             y = int(y / 20) + 1
-            #print(x,y)
-            print(barrierNode.updatePos(x, y))
-            print(barrierNode.isVisited())
+            print((x,y))
+            #print(barrierNode.updatePos(x, y))
+            print(barrierNode.isBarrier((x, y)))
             drawCell(x, y, barrierNode.getColor())
             #clock.tick(30)
         
@@ -161,11 +210,13 @@ while running:
             eraseCell(x, y)
 
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == leftClick and x == 10 and y == 40:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == leftClick and x == 6 and y == 42:
             print("test")
+            dijkstrasAlgo(startingNode.getRow(), startingNode.getCol())
+
             #clock.tick(30)
 
-        
+
     #drawCell(startingNode.getRow(),startingNode.getCol(), startingNode.getColor())
     #drawCell(endNode.getRow(),endNode.getCol(), endNode.getColor())
     pygame.display.update()

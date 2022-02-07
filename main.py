@@ -1,4 +1,4 @@
-from turtle import pos
+#from turtle import pos
 import pygame, sys, time
 import math
 from queue import PriorityQueue
@@ -62,14 +62,20 @@ class Node:
         self.col = newCol
         return (self.row, self.col)
 
-    def isBarrier(self, position):
-        if position in self.barrierList:
-            return True
-        else:
-            self.barrierList.append(position)
+    def isBarrier(self, position, bool):
+        # removes barrier if it was even a barrier in the first place
+        if bool == False and position in self.barrierList:
+            self.barrierList.remove(position)
             print(self.barrierList)
             return False
-        
+
+        # appends barrier position ONCE if not in the list
+        elif bool == True:
+            if position not in self.barrierList:
+                self.barrierList.append(position)
+                print(self.barrierList)
+                return True
+     
 
 
 startingNode = Node(5, 5, green)
@@ -108,11 +114,13 @@ def dijkstrasAlgo(startRow, startCol):
     x = int(x / 20) + 1
     y = int(y / 20) + 1
     for i in range(1, 10):
-        if barrierNode.isBarrier((startRow + i, startCol)):
+        if (startRow + i, startCol) in barrierNode.barrierList:
             print("BARRIER")
             break
         else:
             drawCell(startRow + i, startCol, lightGreen)
+            drawGrid(width)
+
             pygame.time.delay(700)
             pygame.display.update()
 
@@ -178,8 +186,6 @@ def eraseCell(row, col):
 
 
 
-
-
 running = True
 while running:
     drawGrid(width)
@@ -198,8 +204,8 @@ while running:
             y = int(y / 20) + 1
             print((x,y))
             #print(barrierNode.updatePos(x, y))
-            print(barrierNode.isBarrier((x, y)))
             drawCell(x, y, barrierNode.getColor())
+            print(barrierNode.isBarrier((x, y), True))
             #clock.tick(30)
         
         # Erases cell on right click
@@ -207,8 +213,9 @@ while running:
             x,y = pygame.mouse.get_pos() 
             x = int(x / 20) + 1
             y = int(y / 20) + 1
-            eraseCell(x, y)
 
+            eraseCell(x, y)
+            print(barrierNode.isBarrier((x, y), False))
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == leftClick and x == 6 and y == 42:
             print("test")

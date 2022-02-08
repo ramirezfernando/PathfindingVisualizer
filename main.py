@@ -43,6 +43,8 @@ class Node:
         self.prev = None
         self.barrierList = []
 
+    def getPos(self):
+        return (self.row, self.col)
   
     def getRow(self):
         return self.row
@@ -99,6 +101,7 @@ dijkstrasButton = Button("Dijkstra's Algorithm")
 
 
 # Algorithms
+'''
 def dijkstrasAlgo(startRow, startCol):
     clock.tick(5)
     #count = 0
@@ -123,7 +126,24 @@ def dijkstrasAlgo(startRow, startCol):
 
             pygame.time.delay(700)
             pygame.display.update()
-
+'''
+def dijkstrasAlgo(start, end):
+    #Mark all nodes unvisited. Create a set of all the unvisited nodes called the unvisited set.
+    #start = (5, 5)
+    #end = (35, 35)
+    unvisitedSet = []
+    for row in range(1,40+1):
+        for col in range(1,40+1):
+            if (row, col) not in barrierNode.barrierList:
+                unvisitedSet.append([row, col])
+    #print(unvisitedSet)
+    #visited = PriorityQueue()
+    
+    #Assign to every node a tentative distance value: set it to zero for our initial node and to infinity for all other nodes. 
+    #The tentative distance of a node v is the length of the shortest path discovered so far between the node v and the starting node. 
+    #Since initially no path is known to any other vertex than the source itself (which is a path of length zero), all other tentative distances are initially set to infinity. 
+    #Set the initial node as current.
+#dijkstrasAlgo(1,2,3)
 
 
 
@@ -202,10 +222,17 @@ while running:
             x,y = pygame.mouse.get_pos() 
             x = int(x / 20) + 1
             y = int(y / 20) + 1
-            print((x,y))
+            #print((x,y))
             #print(barrierNode.updatePos(x, y))
-            drawCell(x, y, barrierNode.getColor())
-            print(barrierNode.isBarrier((x, y), True))
+         
+            if (startingNode.getPos()) == (x, y):
+                print("Start node here")
+            elif (endNode.getPos() == (x,y)):
+                print("End node here")
+    
+            else:
+                drawCell(x, y, barrierNode.getColor())
+                print(barrierNode.isBarrier((x, y), True))
             #clock.tick(30)
         
         # Erases cell on right click
@@ -219,7 +246,9 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == leftClick and x == 6 and y == 42:
             print("test")
-            dijkstrasAlgo(startingNode.getRow(), startingNode.getCol())
+            dijkstrasAlgo(startingNode.getPos(), endNode.getPos())
+            print(startingNode.getPos())
+            print(endNode.getPos())
 
             #clock.tick(30)
 

@@ -55,7 +55,7 @@ class Node:
     def getColor(self):
         return self.color
 
-    def getNeibors(self):
+    def getNeighbors(self):
         return [(self.row, self.col-1), (self.row, self.col+1), (self.row-1, self.col), (self.row+1, self.col)]
         # up down left right
 
@@ -127,23 +127,48 @@ def dijkstrasAlgo(startRow, startCol):
             pygame.time.delay(700)
             pygame.display.update()
 '''
-def dijkstrasAlgo(start, end):
-    #Mark all nodes unvisited. Create a set of all the unvisited nodes called the unvisited set.
+
+
+
+def dijkstrasAlgo(startNode, endNode):
+    #startNode.getPos()
+    current = startNode.getPos()
+    # 1 Mark all nodes unvisited. Create a set of all the unvisited nodes called the unvisited set.
     #start = (5, 5)
     #end = (35, 35)
+    openCell = PriorityQueue()
+    openCell.put(0, current)
+
+
     unvisitedSet = []
     for row in range(1,40+1):
         for col in range(1,40+1):
             if (row, col) not in barrierNode.barrierList:
-                unvisitedSet.append([row, col])
+                unvisitedSet.append((row, col))
+                openCell.put(float('inf'), (row, col))
+
+    # check neighbors of current (start, for now) up down left right and assign there distance to 1 from start
+    for coordinate in startNode.getNeighbors():
+        if coordinate in unvisitedSet:
+            print(coordinate)
+            x, y = coordinate
+            drawCell(x, y, lightGreen)
+                    
+            
+
     #print(unvisitedSet)
-    #visited = PriorityQueue()
+    #Dijkstra's algorithm needs a priority queue to find the next node to explore.
+  
     
-    #Assign to every node a tentative distance value: set it to zero for our initial node and to infinity for all other nodes. 
-    #The tentative distance of a node v is the length of the shortest path discovered so far between the node v and the starting node. 
-    #Since initially no path is known to any other vertex than the source itself (which is a path of length zero), all other tentative distances are initially set to infinity. 
-    #Set the initial node as current.
-#dijkstrasAlgo(1,2,3)
+    # 2 Assign to every node a tentative distance value: set it to zero for our initial node and to infinity for all other nodes. 
+    #   The tentative distance of a node v is the length of the shortest path discovered so far between the node v and the starting node. 
+    #   Since initially no path is known to any other vertex than the source itself (which is a path of length zero), all other tentative distances are initially set to infinity. 
+    #   Set the initial node as current.
+
+    # 3 For the current node, consider all of its unvisited neighbors and calculate their tentative distances through the current node. 
+    # Compare the newly calculated tentative distance to the current assigned value and assign the smaller one. 
+    # For example, if the current node A is marked with a distance of 6, and the edge connecting it with a neighbor B has length 2, 
+    # then the distance to B through A will be 6 + 2 = 8. If B was previously marked with a distance greater than 8 then change it to 8. Otherwise, the current value will be kept.
 
 
 
@@ -213,7 +238,6 @@ while running:
     drawCell(startingNode.getRow(),startingNode.getCol(), startingNode.getColor())
     drawCell(endNode.getRow(),endNode.getCol(), endNode.getColor())
 
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -245,10 +269,9 @@ while running:
             print(barrierNode.isBarrier((x, y), False))
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == leftClick and x == 6 and y == 42:
-            print("test")
-            dijkstrasAlgo(startingNode.getPos(), endNode.getPos())
-            print(startingNode.getPos())
-            print(endNode.getPos())
+            print("dijkstras algorithm")
+            dijkstrasAlgo(startingNode, endNode)
+          
 
             #clock.tick(30)
 

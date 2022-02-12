@@ -64,6 +64,7 @@ class Node:
         self.col = newCol
         return (self.row, self.col)
 
+
     def isBarrier(self, position, bool):
         # removes barrier if it was even a barrier in the first place
         if bool == False and position in self.barrierList:
@@ -83,10 +84,8 @@ class Node:
 startingNode = Node(5, 5, green)
 endNode = Node(35, 35, red)
 barrierNode = Node(0, 0, black)
+pathfindNode = Node(0, 0, lightGreen)
 
-
-#print(startingNode.updatePos(10, 10))
-#print(startingNode.getRow())
 startingNode.barrier = True
 print(startingNode.barrier)
 
@@ -101,59 +100,76 @@ dijkstrasButton = Button("Dijkstra's Algorithm")
 
 
 # Algorithms
-'''
-def dijkstrasAlgo(startRow, startCol):
-    clock.tick(5)
-    #count = 0
-    #openSet = PriorityQueue()
-    #openSet.put((0, count, ))
-    #From each of the unvisited vertices, choose the vertex with the smallest distance and visit it.
 
-    #Update the distance for each neighboring vertex, of the visited vertex, whose current distance is greater than its sum and the weight of the edge between them.
 
-    #Repeat steps 1 and 2 until all the vertices are visited.
-    #pygame.time.delay(700)
-    x,y = pygame.mouse.get_pos() 
-    x = int(x / 20) + 1
-    y = int(y / 20) + 1
-    for i in range(1, 10):
-        if (startRow + i, startCol) in barrierNode.barrierList:
-            print("BARRIER")
-            break
-        else:
-            drawCell(startRow + i, startCol, lightGreen)
-            drawGrid(width)
-
-            pygame.time.delay(700)
-            pygame.display.update()
-'''
-
+# --- Helper Function ---
+def distance(coord1, coord2):
+    x1, y1 = coord1
+    x2, y2 = coord2
+    return ((x2 - x1)**2 + (y2 - y1)**2)**(1/2)
+#print(distance((5, 5),(35, 35)))
 
 
 def dijkstrasAlgo(startNode, endNode):
-    #startNode.getPos()
-    current = startNode.getPos()
-    # 1 Mark all nodes unvisited. Create a set of all the unvisited nodes called the unvisited set.
-    #start = (5, 5)
-    #end = (35, 35)
+    #startPos = (5, 5)
+    #endPos = (35, 35)
+
+
+    current = startNode
+    currentPos = startNode.getPos()
+    startPos = startNode.getPos()
+
+    visitedSet = []
+    visitedSet.append(currentPos)
+    
     openCell = PriorityQueue()
-    openCell.put(0, current)
+    openCell.put((0, currentPos)) # (0, (5, 5))
 
-
+    # -- Starting unvisited set ---
     unvisitedSet = []
     for row in range(1,40+1):
         for col in range(1,40+1):
             if (row, col) not in barrierNode.barrierList:
                 unvisitedSet.append((row, col))
-                openCell.put(float('inf'), (row, col))
+                
+    #current = openCell.get() # (0, (5, 5))
+    #print(current[1]) # (5, 5)
+    
+    while currentPos != endNode.getPos():
+        for coordinate in current.getNeighbors():
+            pygame.time.delay(1)
+            if coordinate in unvisitedSet and coordinate not in visitedSet:
 
-    # check neighbors of current (start, for now) up down left right and assign there distance to 1 from start
-    for coordinate in startNode.getNeighbors():
-        if coordinate in unvisitedSet:
-            print(coordinate)
-            x, y = coordinate
-            drawCell(x, y, lightGreen)
-                    
+                # update distance of neighbors from start
+                openCell.put((distance(startPos, coordinate), coordinate))
+                
+
+                unvisitedSet.remove(coordinate)
+                visitedSet.append(coordinate)
+
+                #print(coordinate)
+                row, col = coordinate
+                drawCell(row, col, lightGreen)
+                drawGrid(width)
+                pygame.display.update()
+
+        # gets shortest distance from START 
+        smallestDistanceinQueue = openCell.get()
+        row, col = smallestDistanceinQueue[1]
+
+        pathfindNode.updatePos(row, col)
+        print(row, col)
+        current = pathfindNode
+        currentPos = pathfindNode.getPos()
+        
+    '''
+    for coordinate in visitedSet:
+        row, col = coordinate
+        drawCell(row, col, yellow)
+        pygame.display.update()
+    '''
+     
+           
             
 
     #print(unvisitedSet)
@@ -268,7 +284,7 @@ while running:
             eraseCell(x, y)
             print(barrierNode.isBarrier((x, y), False))
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == leftClick and x == 6 and y == 42:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == leftClick and (x >= 2 and x <= 9)  and y == 42:
             print("dijkstras algorithm")
             dijkstrasAlgo(startingNode, endNode)
           

@@ -80,7 +80,7 @@ class Node:
                 return True
      
 
-
+# -- Node setup -- 
 startingNode = Node(5, 5, green)
 endNode = Node(35, 35, red)
 barrierNode = Node(0, 0, black)
@@ -89,24 +89,73 @@ pathfindNode = Node(0, 0, lightGreen)
 startingNode.barrier = True
 print(startingNode.barrier)
 
+
 class Button:
-    def __init__(self, text):
-        self.text = font.render(text, 1, pygame.Color("White"))
-        self.size = self.text.get_size()
-        self.surface = pygame.Surface(self.size)
-        self.surface.blit(self.text, (0,0))
+	def __init__(self,text,width,height,pos,elevation):
+		#Core attributes 
+		self.pressed = False
+		self.elevation = elevation
+		self.dynamic_elecation = elevation
+		self.original_y_pos = pos[1]
 
-dijkstrasButton = Button("Dijkstra's Algorithm")
+		# top rectangle 
+		self.top_rect = pygame.Rect(pos,(width,height))
+		self.top_color = '#475F77'
+
+		# bottom rectangle 
+		self.bottom_rect = pygame.Rect(pos,(width,height))
+		self.bottom_color = '#354B5E'
+		#text
+		self.text_surf = font.render(text,True,'#FFFFFF')
+		self.text_rect = self.text_surf.get_rect(center = self.top_rect.center)
+
+	def draw(self):
+		# elevation logic 
+		self.top_rect.y = self.original_y_pos - self.dynamic_elecation
+		self.text_rect.center = self.top_rect.center 
+
+		self.bottom_rect.midtop = self.top_rect.midtop
+		self.bottom_rect.height = self.top_rect.height + self.dynamic_elecation
+
+		pygame.draw.rect(screen,self.bottom_color, self.bottom_rect,border_radius = 12)
+		pygame.draw.rect(screen,self.top_color, self.top_rect,border_radius = 12)
+		screen.blit(self.text_surf, self.text_rect)
+		self.check_click()
+
+	def check_click(self):
+		mouse_pos = pygame.mouse.get_pos()
+		if self.top_rect.collidepoint(mouse_pos):
+			self.top_color = '#D74B4B'
+			if pygame.mouse.get_pressed()[0]:
+				self.dynamic_elecation = 0
+				self.pressed = True
+			else:
+				self.dynamic_elecation = self.elevation
+				if self.pressed == True:
+					#print('click')
+					self.pressed = False
+		else:
+			self.dynamic_elecation = self.elevation
+			self.top_color = '#475F77'
 
 
-# Algorithms
+dijkstrasButton = Button("Dijkstra's Algorithm",200,40,(30,810),5)
+astarButton = Button("A* Search Algorithm", 200, 40, (250, 810),5)
+bfsButton = Button("Breadth-first search", 200, 40, (30, 860),5)
+dfsButton = Button("Depth-first search", 200, 40, (250, 860),5)
+
+clearpathButton = Button("Clear Path", 200, 40, (550, 810),5)
+clearscreenButton = Button("Clear Screen", 200, 40, (550, 860),5)
+
+
+
 
 
 # --- Helper Function ---
 def distance(coord1, coord2):
     x1, y1 = coord1
     x2, y2 = coord2
-    return ((x2 - x1)**2 + (y2 - y1)**2)**(1/2)
+    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 #print(distance((5, 5),(35, 35)))
 
 
@@ -120,79 +169,53 @@ def dijkstrasAlgo(startNode, endNode):
     startPos = startNode.getPos()
 
     visitedSet = []
-    visitedSet.append(currentPos)
-    
-    openCell = PriorityQueue()
-    openCell.put((0, currentPos)) # (0, (5, 5))
 
+    # -- Start node with distance from start and position --
+    openSet = PriorityQueue()
+    openSet.put((0, startPos)) # (0, (5, 5))
+    openSetHash = {}
     # -- Starting unvisited set ---
     unvisitedSet = []
     for row in range(1,40+1):
         for col in range(1,40+1):
             if (row, col) not in barrierNode.barrierList:
                 unvisitedSet.append((row, col))
-                
-    #current = openCell.get() # (0, (5, 5))
-    #print(current[1]) # (5, 5)
+                #openSet.put((100, (row, col))) # instead of infinity im using 100
+                openSetHash[(row, col)] = 100
+    unvisitedSet.remove(startNode.getPos())
+
+
     
+    # -- Main ---
     while currentPos != endNode.getPos():
-        for coordinate in current.getNeighbors():
-            pygame.time.delay(1)
-            if coordinate in unvisitedSet and coordinate not in visitedSet:
+        #x, y = openSet.get()[1]
+        #current.updatePos(x, y)
+        for neighbor in current.getNeighbors():
+            pygame.time.delay(2)
+            if neighbor in unvisitedSet:
+                dist = distance(startPos, neighbor)
+                print(dist)
 
-                # update distance of neighbors from start
-                openCell.put((distance(startPos, coordinate), coordinate))
-                
-
-                unvisitedSet.remove(coordinate)
-                visitedSet.append(coordinate)
-
-                #print(coordinate)
-                row, col = coordinate
-                drawCell(row, col, lightGreen)
+                x, y = neighbor
+                drawCell(x, y, lightGreen)
                 drawGrid(width)
                 pygame.display.update()
 
-        # gets shortest distance from START 
-        smallestDistanceinQueue = openCell.get()
-        row, col = smallestDistanceinQueue[1]
+                if dist < openSetHash[neighbor]:
+                    openSet.put((distance, neighbor))
+                    #del openSetHash[neighbor]
 
-        pathfindNode.updatePos(row, col)
-        print(row, col)
         current = pathfindNode
-        currentPos = pathfindNode.getPos()
-        
-    '''
-    for coordinate in visitedSet:
-        row, col = coordinate
-        drawCell(row, col, yellow)
-        pygame.display.update()
-    '''
-     
-           
+        x, y = openSet.get()[1]
+        pathfindNode.updatePos(x, y)
+
+        visitedSet.append(current)
+             
+                
+
+
+
             
-
-    #print(unvisitedSet)
-    #Dijkstra's algorithm needs a priority queue to find the next node to explore.
-  
-    
-    # 2 Assign to every node a tentative distance value: set it to zero for our initial node and to infinity for all other nodes. 
-    #   The tentative distance of a node v is the length of the shortest path discovered so far between the node v and the starting node. 
-    #   Since initially no path is known to any other vertex than the source itself (which is a path of length zero), all other tentative distances are initially set to infinity. 
-    #   Set the initial node as current.
-
-    # 3 For the current node, consider all of its unvisited neighbors and calculate their tentative distances through the current node. 
-    # Compare the newly calculated tentative distance to the current assigned value and assign the smaller one. 
-    # For example, if the current node A is marked with a distance of 6, and the edge connecting it with a neighbor B has length 2, 
-    # then the distance to B through A will be 6 + 2 = 8. If B was previously marked with a distance greater than 8 then change it to 8. Otherwise, the current value will be kept.
-
-
-
-
-
-
-
-
 
 
 
@@ -249,8 +272,17 @@ def eraseCell(row, col):
 
 running = True
 while running:
+    # screen setup
     drawGrid(width)
-    screen.blit(dijkstrasButton.surface, (20, width+20))
+    dijkstrasButton.draw()
+    astarButton.draw()
+    bfsButton.draw()
+    dfsButton.draw()
+    clearpathButton.draw()
+    clearscreenButton.draw()
+
+
+
     drawCell(startingNode.getRow(),startingNode.getCol(), startingNode.getColor())
     drawCell(endNode.getRow(),endNode.getCol(), endNode.getColor())
 
@@ -284,14 +316,30 @@ while running:
             eraseCell(x, y)
             print(barrierNode.isBarrier((x, y), False))
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == leftClick and (x >= 2 and x <= 9)  and y == 42:
-            print("dijkstras algorithm")
-            dijkstrasAlgo(startingNode, endNode)
-          
 
-            #clock.tick(30)
+        if dijkstrasButton.pressed:
+            print("dijkstra")
 
 
-    #drawCell(startingNode.getRow(),startingNode.getCol(), startingNode.getColor())
-    #drawCell(endNode.getRow(),endNode.getCol(), endNode.getColor())
+        if astarButton.pressed:
+            print("A*")
+
+        if bfsButton.pressed:
+            print("BFS")
+
+        if dfsButton.pressed:
+            print("DFS")
+
+
+        if clearpathButton.pressed:
+            print("clear path")
+
+        if clearscreenButton.pressed:
+            print("clear screen")
+            
+            for node in barrierNode.barrierList:
+                x,y = node
+                eraseCell(x, y)
+            barrierNode.barrierList.clear()
+
     pygame.display.update()

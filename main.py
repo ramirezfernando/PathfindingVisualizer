@@ -147,6 +147,7 @@ def distance(coord1, coord2):
     x2, y2 = coord2
     #return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     return abs(x2 - x1) + abs(y2 - y1)
+    #return ((x2 - x1)**2 + (y2 - y1)**2)**(1/2)
 
 def neighbors(coord):
     row, col = coord
@@ -239,7 +240,7 @@ def dijkstrasAlgo(startNode, endNode):
              
 
         elif openSetHash[i] == startDist + 1:
-            x, y = shortestPath[len(shortestPath) - 3]
+            x, y = shortestPath[len(shortestPath) - 1]
             drawCell(x, y, yellow)
             drawGrid(width)
             #pygame.display.update()
@@ -530,10 +531,15 @@ while running:
         if clearpathButton.pressed:
             print("clear path")
 
+            for node in barrierNode.barrierList:
+                x,y = node
+                eraseCell(x, y)
+            barrierNode.barrierList.clear()
+
         if clearscreenButton.pressed:
             print("clear screen")
             
-            for node in barrierNode.barrierList:
+            for node in unvisitedSet:
                 x,y = node
                 eraseCell(x, y)
             barrierNode.barrierList.clear()

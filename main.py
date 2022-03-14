@@ -1,3 +1,5 @@
+import queue
+from turtle import down, right
 import pygame, sys, time
 import math
 from queue import PriorityQueue
@@ -204,49 +206,23 @@ def dijkstrasAlgo(startNode, endNode):
                     openSet.put((dist, neighbor))
 
                     
-                    
-
-   
-
         x, y = openSet.get()[1]
         pathfindNode.updatePos(x, y)
         currentPos = pathfindNode.getPos()
         current = pathfindNode
 
-    
-    #print(shortestPath)
-    #print(startNode.getPos())
-
-    #print(openSetHash)
+    # rebuild shortest path
     shortestPath = []
     startDist = 1
-    #shortestPath.append((100,100))
-
-    #temp = list(openSetHash)
-
     for i in openSetHash:
-       
-        #print(i, i+1)
-        #print(i, distance(i, endNode.getPos()))
-        
-        if openSetHash[i] == startDist:
-            #smallestPath = min(distance(i, endNode.getPos()), distance(shortestPath[0], endNode.getPos()))
-            
+        if openSetHash[i] == startDist:            
             shortestPath.append(i)
-            #shortestPath.remove(shortestPath[0])
             print(shortestPath)
-            #print(shortestPath)
-            #print(i, smallestPath)
              
-
         elif openSetHash[i] == startDist + 1:
             x, y = shortestPath[len(shortestPath) - 1]
             drawCell(x, y, yellow)
             drawGrid(width)
-            #pygame.display.update()
-            #print(shortestPath)
-
-            #print(i, smallestPath)
             startDist += 1
             shortestPath.clear()
             print('\n')
@@ -257,12 +233,6 @@ def dijkstrasAlgo(startNode, endNode):
    
 
 
-def h(p1, p2):
-	x1, y1 = p1
-	x2, y2 = p2
-	return abs(x1 - x2) + abs(y1 - y2)
-
-
 def reconstruct_path(came_from, current):
     while current in came_from:
         current = came_from[current]
@@ -270,84 +240,79 @@ def reconstruct_path(came_from, current):
         #drawCell(x, y, yellow)
         print(current)
 
+
 def aStar(start, end):
-
-    
-    '''
-    count = 0
-    open_set = PriorityQueue()
-	open_set.put((0, count, start))
-	came_from = {}
-	g_score = {spot: float("inf") for spot in unvisited}
-	g_score[start] = 0
-	f_score = {spot: float("inf") for spot in unvisited}
-	f_score[start] = h(start.getPos(), end.getPos())
-
-	open_set_hash = {start}
-
-	while not open_set.empty():
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				pygame.quit()
-
-		current = open_set.get()[2]
-		open_set_hash.remove(current)
-
-		if current == end:
-			reconstruct_path(came_from, end)
-			return True
-
-		for neighbor in current.neighbors:
-			temp_g_score = g_score[current] + 1
-
-			if temp_g_score < g_score[neighbor]:
-				came_from[neighbor] = current
-				g_score[neighbor] = temp_g_score
-				f_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end.get_pos())
-				if neighbor not in open_set_hash:
-					count += 1
-					open_set.put((f_score[neighbor], count, neighbor))
-					open_set_hash.add(neighbor)
-					neighbor.make_open()
+    print("astar")
 
 
-		if current != start:
-			current.make_closed()
 
-	return False
-    '''
-
-
-# Used queue (FIFO)
-def BFS(startNode, endNode):
-    current = startNode
-    currentPos = startNode.getPos()
-    startPos = startNode.getPos()
-
-
-    # -- Starting unvisited set ---
-    unvisited = []
+# Use queue (FIFO)
+def BFS(start, end):
+    unvisitedSet = []
     for row in range(1,dimension+1):
         for col in range(1,dimension+1):
             if (row, col) not in barrierNode.barrierList:
-                unvisited.append((row, col))
+                unvisitedSet.append((row, col))
 
 
+    path = []
+    queue = []
 
+    currentPos = start.getPos() # 3,3
+    row, col = currentPos
+    pathfindNode.updatePos(row, col)
 
-    visited = [] # List to keep track of visited nodes.
-    queue = []     #Initialize a queue
-
-    visited.append(startPos)
-    queue.append(startPos)
-
-    while queue:
-        current = queue.pop(0) 
-
-        for i in unvisited[current]:
-            if i not in visited:
-                queue.append(i)
-                visited.append(i)
+   
+    up = True
+    right = True
+    down = True
+    left = True
+    print(endNode.getPos())
+    while currentPos != endNode.getPos():
+        
+        #up
+        while up:
+            if pathfindNode.getNeighbors()[0] in unvisitedSet:
+                queue.append(pathfindNode.getNeighbors()[0])
+                unvisitedSet.remove(pathfindNode.getNeighbors()[0])
+            else:
+                break
+            
+        #right
+        while right:
+            if pathfindNode.getNeighbors()[3] in unvisitedSet:
+                queue.append(pathfindNode.getNeighbors()[3])
+                unvisitedSet.remove(pathfindNode.getNeighbors()[3])
+            else:
+                break
+        #down
+        while down:
+            if pathfindNode.getNeighbors()[1] in unvisitedSet:
+                queue.append(pathfindNode.getNeighbors()[1])
+                unvisitedSet.remove(pathfindNode.getNeighbors()[1])
+            else:
+                break
+        #left
+        while left:
+            if pathfindNode.getNeighbors()[2] in unvisitedSet:
+                queue.append(pathfindNode.getNeighbors()[2])
+                unvisitedSet.remove(pathfindNode.getNeighbors()[2])
+            else:
+                break
+            
+        
+        if currentPos !=start.getPos():
+            pygame.time.delay(20)
+            x,y = currentPos
+            drawCell(x, y, lightGreen)
+            drawGrid(width)
+            pygame.display.update()
+        
+        x, y = currentPos
+        currentPos = queue[0]
+        queue.remove(queue[0])
+        pathfindNode.updatePos(x, y)
+        #print(x,y)
 
     
 
@@ -356,55 +321,120 @@ def BFS(startNode, endNode):
 # Uses a stack (LIFO)
 def DFS(start, end):
     # node function: up down left right, [0] , [1], [2], [3]
-    # well do top, right ,down, left, [0], [3], [1], [2]
-    unvisited = []
+    # we'll do top, right ,down, left, [0], [3], [1], [2]
 
+    unvisitedSet = []
     for row in range(1,dimension+1):
         for col in range(1,dimension+1):
             if (row, col) not in barrierNode.barrierList:
-                unvisited.append((row, col))
-
-    visited = set()
-    poss_way = [(0,1), (1,0)]
+                unvisitedSet.append((row, col))
 
 
-    start_tick = pygame.time.get_ticks()
+    path = []
+    stack = []
 
-    while poss_way:
-        curr_search = poss_way.pop()
-        x,y = curr_search[0], curr_search[1]
+    currentPos = start.getPos() # 3,3
+    stack.append(currentPos)
+    row, col = currentPos
+    pathfindNode.updatePos(row, col)
 
-        if grid[x][y].color == BLACK:
-            continue
-        else:
-            if (x,y) in visited:
-                continue
+   
+    up = True
+    right = True
+    down = True
+    left = True
+    #print(endNode.getPos())
+    running = True
+    while running:
+        if currentPos == end.getPos():
+            running = False
+            break
+        #up
+        while up:
+            if pathfindNode.getNeighbors()[0] in unvisitedSet:
+                stack.append(pathfindNode.getNeighbors()[0])
+                unvisitedSet.remove(pathfindNode.getNeighbors()[0])
 
-            visited.add((x,y))
+                currentPos = stack.pop()
+                x, y = currentPos
+                pathfindNode.updatePos(x, y)
 
-            grid[x][y].color = GREEN
-            draw(x, y, yellow)
-            pygame.time.wait(10)
+                drawCell(x, y, lightGreen)
+                drawGrid(width)
+                pygame.display.update()
+            else:
+                break
+            
+        #right
+        while right:
+            if pathfindNode.getNeighbors()[3] in unvisitedSet:
+                stack.append(pathfindNode.getNeighbors()[3])
+                unvisitedSet.remove(pathfindNode.getNeighbors()[3])
 
-            if y > 0 and (x, y-1) in unvisitedSet:
-                poss_way.append((x,y-1))
-                if grid[x][y-1].color == RED:
-                    return True
+                currentPos = stack.pop()
+                x, y = currentPos
+                pathfindNode.updatePos(x, y)
 
-            if x > 0 and grid[x-1][y].color != BLACK:
-                poss_way.append((x-1,y))
-                if grid[x-1][y].color == RED:
-                    return True
+                drawCell(x, y, lightGreen)
+                drawGrid(width)
+                pygame.display.update()
+            else:
+                break
+        #down
+        while down:
+            if pathfindNode.getNeighbors()[1] in unvisitedSet:
+                stack.append(pathfindNode.getNeighbors()[1])
+                unvisitedSet.remove(pathfindNode.getNeighbors()[1])
 
-            if  x < (rows-1) and grid[x+1][y].color != BLACK:
-                poss_way.append((x+1,y))	
-                if grid[x+1][y].color == RED:
-                    return True
+                currentPos = stack.pop()
+                x, y = currentPos
+                pathfindNode.updatePos(x, y)
 
-            if  y < (rows-1) and grid[x][y+1].color != BLACK:
-                poss_way.append((x,y+1))
-                if grid[x][y+1].color == RED:
-                    return True
+                drawCell(x, y, lightGreen)
+                drawGrid(width)
+                pygame.display.update()
+            else:
+                break
+        #left
+        while left:
+            if pathfindNode.getNeighbors()[2] in unvisitedSet:
+                stack.append(pathfindNode.getNeighbors()[2])
+                unvisitedSet.remove(pathfindNode.getNeighbors()[2])
+
+                currentPos = stack.pop()
+                x, y = currentPos
+                pathfindNode.updatePos(x, y)
+
+                drawCell(x, y, lightGreen)
+                drawGrid(width)
+                pygame.display.update()
+            else:
+                break
+
+        if currentPos == end.getPos():
+            running = False
+            break
+            
+        '''
+        if currentPos !=start.getPos():
+            if currentPos != end.getPos():
+                pygame.time.delay(20)
+                x,y = currentPos
+                drawCell(x, y, lightGreen)
+                drawGrid(width)
+                pygame.display.update()
+            else:
+                running = False
+        
+        
+        x, y = currentPos
+        currentPos = stack.pop()
+        #stack.remove(stack[0])
+        pathfindNode.updatePos(x, y)
+        #print(x,y)
+        '''
+    print("Done")
+
 
 
     
